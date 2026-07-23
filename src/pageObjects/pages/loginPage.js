@@ -6,9 +6,8 @@ class LoginPage extends BasePage {
 
     async open() {
 
-        await super.open(
-            'https://practicesoftwaretesting.com/auth/login');
-
+        await super.open('https://practicesoftwaretesting.com/auth/login');
+        
     }
 
     async login(email, password) {

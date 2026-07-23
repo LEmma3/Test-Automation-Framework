@@ -152,7 +152,7 @@ class HomePage extends BasePage{
 
     }
 
-    async openProductByName(name) {
+    /*async openProductByName(name) {
         const products = await this.productCards;
             for (let product of products) {
                 const text = await product.getText();
@@ -161,7 +161,19 @@ class HomePage extends BasePage{
                     break;
                 }
             }
+        }*/
+
+    async openProductByName(name) {
+        const products = await HomePageComponents.productCards;
+        for (let product of products) {
+            const text = await product.getText();
+            if (text.includes(name)) {
+                await product.click();
+                break;
+            }
         }
+    }
+
 
     async addProductToCompare(index) {
     const button = await $$('[data-test="compare-btn"]')[index];
