@@ -22,13 +22,20 @@ class HomePage extends BasePage{
 
     async searchForProduct(product) {
 
-        await this.searchInput.setValue(product);
+        await HomePageComponents.searchInput.setValue(product);
 
-        await this.waitForElement(this.searchButton);
+        await this.waitForElement(HomePageComponents.searchButton);
 
-        await this.click(
-            this.searchButton
-        );
+        await this.click(HomePageComponents.searchButton);
+
+        await browser.waitUntil(async () => {
+            const titles = await this.getProductTitles();
+            return titles.length > 0 &&
+                titles.every(title =>
+                    title.toLowerCase().includes(product.toLowerCase())
+                );
+        });
+        
     }
 
 
@@ -49,17 +56,6 @@ class HomePage extends BasePage{
     }
 
     /**async getProductTitles() {
-    const elements = await this.productTitles;
-    const texts = [];
-
-    for (const element of elements) {
-        texts.push(await element.getText());
-    }
-
-    return texts;
-    }*/
-
-    async getProductTitles() {
 
         const titles = [];
 
@@ -70,26 +66,90 @@ class HomePage extends BasePage{
         }
 
         return titles;
+    }*/
+
+    async getProductTitles() {
+
+        const titles = [];
+
+        const products = await HomePageComponents.productTitles;
+
+        for (const product of products) {
+
+            titles.push(await product.getText());
+
+        }
+
+        return titles;
+
     }
 
     async setPriceRange() {
-        await this.priceFilterMin.waitForDisplayed();
-        await this.priceFilterMax.waitForDisplayed();
-        await this.priceFilterMin.dragAndDrop({x:68, y: 0});
-        await browser.pause(1000);
-        await this.priceFilterMax.dragAndDrop({x:1, y:0});
-        await browser.pause(1000);
+
+        await this.waitForElement(HomePageComponents.priceFilterMin);
+
+        await this.waitForElement(HomePageComponents.priceFilterMax);
+
+        await HomePageComponents.priceFilterMin.dragAndDrop({
+            x: 68,
+            y: 0
+        });
+
+        await HomePageComponents.priceFilterMax.dragAndDrop({
+            x: 1,
+            y: 0
+        });
+
     }
 
     async getProductPrices() {
-        const prices = await this.productPrices;
-        const values = [];
 
-        for (let price of prices) {
-            const text = await price.getText();
-            values.push(parseFloat(text.replace('$', '')));
+        await browser.waitUntil(async () => {
+
+            const products = await HomePageComponents.productPrices;
+
+            return products.length > 0 &&
+            await products[0].isDisplayed();
+
+    }, {
+            timeout: 10000,
+            timeoutMsg: 'Product prices were not loaded'
+        });
+
+        const prices = [];
+
+        const elements = await HomePageComponents.productPrices;
+
+        await this.waitForElements(HomePageComponents.productPrices);
+
+        for (const element of elements) {
+
+            const value = await element.getText();
+
+            prices.push(
+                parseFloat(
+                    value.replace('$', '')
+                )
+            );
+
         }
-        return values;
+
+        console.log(prices);
+        return prices;
+    
+    }
+
+    async getMinimumPriceValue() {
+
+        return await HomePageComponents.priceFilterMin.getAttribute('aria-valuenow');
+
+    }
+
+
+    async getMaximumPriceValue() {
+
+        return await HomePageComponents.priceFilterMax.getAttribute('aria-valuenow');
+
     }
 
     async openProductByName(name) {

@@ -23,6 +23,31 @@ class BasePage {
         await element.click();
     }
 
+    async type(element, text) {
+        await this.waitForElement(element);
+        await element.setValue(text);
+    }
+
+    async waitForElements(elements) {
+
+        await browser.waitUntil(async () => {
+
+            const list = await elements;
+
+            return list.length > 0;
+
+        }, {
+            timeout: 10000,
+            timeoutMsg: 'Elements were not loaded'
+        });
+
+
+        await elements[0].waitForDisplayed({
+            timeout: 5000
+        });
+
+    }
+
 }
 
 module.exports = BasePage;
